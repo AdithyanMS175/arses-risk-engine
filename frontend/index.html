@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARSES — Risk Scoring Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-100">
+    <div class="mx-auto max-w-5xl px-4 py-10">
+      <header class="mb-8">
+        <h1 class="text-3xl font-semibold tracking-tight">
+          AI Risk Scoring Engine Stub (ARSES)
+        </h1>
+        <p class="mt-2 text-slate-300">
+          Enter risk parameters, evaluate, and inspect confidence metadata.
+        </p>
+      </header>
+
+      <main class="grid gap-6 lg:grid-cols-2">
+        <section
+          class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 shadow"
+        >
+          <h2 class="text-lg font-semibold">Risk Inputs</h2>
+          <form id="riskForm" class="mt-4 space-y-4">
+            <div>
+              <label class="text-sm font-medium text-slate-200" for="userId"
+                >User ID</label
+              >
+              <input
+                id="userId"
+                name="userId"
+                class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950/40 px-3 py-2 text-slate-100 outline-none ring-0 focus:border-slate-500"
+                placeholder="12345"
+                required
+              />
+            </div>
+
+            <div>
+              <label class="text-sm font-medium text-slate-200" for="amount"
+                >Transaction Amount</label
+              >
+              <input
+                id="amount"
+                name="amount"
+                type="number"
+                min="0"
+                step="0.01"
+                class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950/40 px-3 py-2 text-slate-100 outline-none ring-0 focus:border-slate-500"
+                placeholder="5000"
+                required
+              />
+              <p class="mt-1 text-xs text-slate-400">
+                Normalization buckets: 0–1000, 1000–10000, 10000+
+              </p>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between">
+                <label
+                  class="text-sm font-medium text-slate-200"
+                  for="locationRisk"
+                  >Location Risk</label
+                >
+                <span
+                  id="locationRiskValue"
+                  class="text-sm text-slate-300 tabular-nums"
+                  >0.60</span
+                >
+              </div>
+              <input
+                id="locationRisk"
+                name="locationRisk"
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value="0.6"
+                class="mt-2 w-full"
+              />
+            </div>
+
+            <div>
+              <label class="text-sm font-medium text-slate-200" for="activity"
+                >Activity Type</label
+              >
+              <select
+                id="activity"
+                name="activity"
+                class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950/40 px-3 py-2 text-slate-100 outline-none ring-0 focus:border-slate-500"
+              >
+                <option value="transfer" selected>transfer</option>
+                <option value="withdrawal">withdrawal</option>
+                <option value="deposit">deposit</option>
+                <option value="unknown">unknown</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-3 pt-2">
+              <button
+                id="evaluateBtn"
+                type="submit"
+                class="inline-flex items-center justify-center rounded-xl bg-indigo-500 px-4 py-2 font-medium text-white hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Evaluate Risk
+              </button>
+              <span id="statusText" class="text-sm text-slate-300"></span>
+            </div>
+          </form>
+
+          <div
+            id="errorBox"
+            class="mt-4 hidden rounded-xl border border-rose-800 bg-rose-950/40 p-3 text-sm text-rose-200"
+          ></div>
+        </section>
+
+        <section
+          class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 shadow"
+        >
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-semibold">Result</h2>
+              <p class="mt-1 text-sm text-slate-300">
+                Risk score, level, and confidence metadata.
+              </p>
+            </div>
+            <div class="text-right text-xs text-slate-400">
+              API: <span class="font-mono" id="apiBase">http://localhost:8000</span>
+            </div>
+          </div>
+
+          <div class="mt-5 grid gap-4 sm:grid-cols-3">
+            <div class="rounded-xl border border-slate-800 bg-slate-950/30 p-4">
+              <div class="text-xs text-slate-400">Risk Score</div>
+              <div
+                id="riskScore"
+                class="mt-1 text-3xl font-semibold tabular-nums"
+              >
+                —
+              </div>
+            </div>
+            <div class="rounded-xl border border-slate-800 bg-slate-950/30 p-4">
+              <div class="text-xs text-slate-400">Risk Level</div>
+              <div id="riskLevel" class="mt-1 text-2xl font-semibold">—</div>
+            </div>
+            <div class="rounded-xl border border-slate-800 bg-slate-950/30 p-4">
+              <div class="text-xs text-slate-400">Confidence</div>
+              <div
+                id="confidenceValue"
+                class="mt-1 text-2xl font-semibold tabular-nums"
+              >
+                —
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5">
+            <div class="flex items-center justify-between">
+              <div class="text-sm font-medium text-slate-200">
+                Confidence Progress
+              </div>
+              <button
+                id="metaTooltipBtn"
+                type="button"
+                class="relative inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/40 px-3 py-1 text-xs text-slate-200 hover:border-slate-500"
+              >
+                Metadata
+                <span class="text-slate-400">(hover)</span>
+                <span
+                  id="metaTooltip"
+                  class="pointer-events-none absolute right-0 top-9 z-10 hidden w-72 rounded-xl border border-slate-700 bg-slate-950/95 p-3 text-left text-xs text-slate-200 shadow-lg"
+                >
+                  <div class="grid grid-cols-2 gap-x-3 gap-y-1">
+                    <div class="text-slate-400">Model</div>
+                    <div class="font-mono" id="metaModel">—</div>
+                    <div class="text-slate-400">Timestamp</div>
+                    <div class="font-mono" id="metaTimestamp">—</div>
+                    <div class="text-slate-400">Completeness</div>
+                    <div class="font-mono" id="metaCompleteness">—</div>
+                  </div>
+                </span>
+              </button>
+            </div>
+
+            <div class="mt-2 h-3 w-full overflow-hidden rounded-full bg-slate-800">
+              <div
+                id="confidenceBar"
+                class="h-full w-0 rounded-full bg-slate-500 transition-[width,background-color] duration-300"
+              ></div>
+            </div>
+          </div>
+
+          <div
+            class="mt-6 rounded-2xl border border-slate-800 bg-slate-950/20 p-5"
+          >
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-slate-200">Statistics</h3>
+              <span class="text-xs text-slate-400">stored in-memory</span>
+            </div>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+              <div class="rounded-xl border border-slate-800 bg-slate-950/30 p-4">
+                <div class="text-xs text-slate-400">Total Evaluations</div>
+                <div
+                  id="statTotal"
+                  class="mt-1 text-xl font-semibold tabular-nums"
+                >
+                  0
+                </div>
+              </div>
+              <div class="rounded-xl border border-slate-800 bg-slate-950/30 p-4">
+                <div class="text-xs text-slate-400">Average Risk Score</div>
+                <div
+                  id="statAvg"
+                  class="mt-1 text-xl font-semibold tabular-nums"
+                >
+                  —
+                </div>
+              </div>
+              <div class="rounded-xl border border-slate-800 bg-slate-950/30 p-4">
+                <div class="text-xs text-slate-400">LOW</div>
+                <div
+                  id="statLow"
+                  class="mt-1 text-xl font-semibold tabular-nums"
+                >
+                  0
+                </div>
+              </div>
+              <div class="rounded-xl border border-slate-800 bg-slate-950/30 p-4">
+                <div class="text-xs text-slate-400">MEDIUM</div>
+                <div
+                  id="statMedium"
+                  class="mt-1 text-xl font-semibold tabular-nums"
+                >
+                  0
+                </div>
+              </div>
+              <div class="rounded-xl border border-slate-800 bg-slate-950/30 p-4">
+                <div class="text-xs text-slate-400">HIGH</div>
+                <div
+                  id="statHigh"
+                  class="mt-1 text-xl font-semibold tabular-nums"
+                >
+                  0
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="mt-10 text-xs text-slate-500">
+        ARSES is a stub/demo system. Scores are deterministic, confidence is simulated.
+      </footer>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
