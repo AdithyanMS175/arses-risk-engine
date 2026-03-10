@@ -56,16 +56,7 @@ uvicorn main:app --reload
 
 Backend will be available at `http://localhost:8000`.
 
-Optional: PostgreSQL
-
-Set `DATABASE_URL` before running:
-
-```powershell
-$env:DATABASE_URL="postgresql+psycopg2://USER:PASSWORD@localhost:5432/arses"
-uvicorn main:app --reload
-```
-
-### Open frontend
+frontend
 
 Open `frontend/index.html` in your browser:
 
